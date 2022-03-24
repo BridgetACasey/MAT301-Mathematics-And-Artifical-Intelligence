@@ -21,6 +21,8 @@ public class Agent : MonoBehaviour
     [SerializeField] private float moveSpeed = 8.0f;
     [SerializeField] private float turnSpeed = 1.0f;
 
+    [SerializeField] private Vector3 input;
+
     [SerializeField] bool driving;
 
     private float distanceLeft, distanceForward, distanceRight; //The distance in each direction to the nearest wall
@@ -52,6 +54,7 @@ public class Agent : MonoBehaviour
         distanceToGoal = 0.0f;
         transform.position = startPosition;
         transform.Rotate(startRotation);
+        overallFitness = 0.0f;
         driving = true;
     }
 
@@ -93,8 +96,13 @@ public class Agent : MonoBehaviour
 
     public void Drive()
     {
-        transform.position += transform.forward * Time.deltaTime * moveSpeed;
-        transform.eulerAngles += new Vector3(0.0f, 0.0f, 0.0f);
+        //transform.position += transform.forward * Time.deltaTime * moveSpeed;
+        //transform.eulerAngles += new Vector3(0.0f, 0.0f, 0.0f);
+
+        input = Vector3.Lerp(Vector3.zero, new Vector3(0, 0, acceleration * 11.4f), 0.02f);
+        input = transform.TransformDirection(input);
+        transform.position += input;
+        transform.eulerAngles += new Vector3(0, (turnRate * 90) * 0.05f, 0);
     }
 
     public void SetGoalPosition(Vector3 position) { goalPosition = position; }

@@ -24,6 +24,11 @@ public class AgentManager : MonoBehaviour
             ResetAgents();
     }
 
+    public void UpdateAgentAttributes(List<DNA<float>> genes)
+    {
+
+    }
+
     public void SpawnAgent(GameObject agentPrefab, Vector3 spawnPoint)
     {
         agents.Add(GameObject.Instantiate(agentPrefab, spawnPoint, Quaternion.identity));

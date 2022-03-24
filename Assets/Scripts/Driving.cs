@@ -38,7 +38,7 @@ public class Driving : MonoBehaviour
 		if (running)
 		{
 			agentManager.CheckActiveAgents();
-			//agentManager.UpdateAgentJumpingStrength(geneticAlgorithm.Population);
+			agentManager.UpdateAgentAttributes(geneticAlgorithm.Population);
 			geneticAlgorithm.NewGeneration();
 			bestFit = geneticAlgorithm.BestFitness;
 		}
