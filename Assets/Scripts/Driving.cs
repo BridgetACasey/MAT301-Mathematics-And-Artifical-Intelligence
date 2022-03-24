@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class Driving : MonoBehaviour
 {
     [SerializeField] private GameObject agentPrefab;
-	[SerializeField] private GameObject goalPrefab;
+	[SerializeField] private GameObject goal;
 
 	[SerializeField] private Text runButtonText;
 	[SerializeField] private Text genNumText;
@@ -17,6 +17,7 @@ public class Driving : MonoBehaviour
 	[SerializeField] private int innerCount = 40;
 	[SerializeField] private float innerScale = 400.0f;
 	[SerializeField] private float timeScale = 1.0f;
+	[SerializeField] private float bestFit = 0.0f;
 
 	private GeneticAlgorithm<float> geneticAlgorithm;
     private AgentManager agentManager;
@@ -33,22 +34,37 @@ public class Driving : MonoBehaviour
 	void Update()
     {
 		UpdateAlgorithmText();
-    }
+
+		if (running)
+		{
+			agentManager.CheckActiveAgents();
+			//agentManager.UpdateAgentJumpingStrength(geneticAlgorithm.Population);
+			geneticAlgorithm.NewGeneration();
+			bestFit = geneticAlgorithm.BestFitness;
+		}
+	}
 
 	private float GetRandomGene()
 	{
-		// Generate a new value based on the current best (the higher the best,
-		// the greater the next random gene)
+		float next = (float)random.NextDouble();
 
-		return 0.0f;
+		float value = (innerScale + bestFit) / (float)innerCount;
+
+		return (next * value);
 	}
 
 	private float FitnessFunction(int index)
 	{
-		// Go through each gene in a member of the population and make their fitness equal to
-		// their strength
-		
-		return 0.0f;
+		float score = 0.0f;
+
+		DNA<float> dna = geneticAlgorithm.Population[index];
+
+		for (int i = 0; i < dna.Genes.Length; i++)
+		{
+			score += dna.Genes[i] - agentManager.agents[index].GetComponent<Agent>().GetOverallFitness();
+		}
+
+		return score;
 	}
 
 	private void UpdateAlgorithmText()
@@ -79,7 +95,16 @@ public class Driving : MonoBehaviour
 
 		if(running)
         {
-			agentManager.SpawnAgent(agentPrefab, transform.position);
+			for (int i = 0; i < 32; i++)
+			{
+				agentManager.SpawnAgent(agentPrefab, transform.position);
+			}
+
+			foreach(GameObject agent in agentManager.agents)
+			{
+				agent.GetComponent<Agent>().SetupAttributes();
+				agent.GetComponent<Agent>().SetGoalPosition(goal.transform.position);
+			}
 
 			if (runButtonText)
 				runButtonText.text = "STOP";

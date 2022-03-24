@@ -13,8 +13,8 @@ GameObject:
   - component: {fileID: 6845550108974546736}
   - component: {fileID: 6845550108974546739}
   - component: {fileID: 6845550108974546738}
-  - component: {fileID: 6845550108974546751}
-  m_Layer: 0
+  - component: {fileID: 7548564989316327625}
+  m_Layer: 6
   m_Name: Agent
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -113,7 +113,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 80
   m_CollisionDetection: 0
---- !u!114 &6845550108974546751
+--- !u!114 &7548564989316327625
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -125,6 +125,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4dd0bcf087038ee4b92b66d2bf0b7377, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 5
+  moveSpeed: 8
   turnSpeed: 1
-  timeTaken: 0
