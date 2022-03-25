@@ -2,6 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using MathNet.Numerics.LinearAlgebra;
+
+public struct AgentData
+{
+	public List<Matrix<float>> agentWeights;
+	public List<float> agentBiases;
+}
 
 public class Driving : MonoBehaviour
 {
@@ -15,14 +22,14 @@ public class Driving : MonoBehaviour
 	[SerializeField] private Text elapsedTimeText;
 
 	[SerializeField] private float mutationRate = 0.01f;
-	[SerializeField] private int innerCount = 40;
+	[SerializeField] private int innerCount = 1;
 	[SerializeField] private float innerScale = 400.0f;
 	[SerializeField] private float timeScale = 1.0f;
 	[SerializeField] private float bestFit = 0.0f;
 
 	[SerializeField] private float elapsedTime = 0.0f;
 
-	private GeneticAlgorithm<float> geneticAlgorithm;
+	private GeneticAlgorithm<AgentData> geneticAlgorithm;
     private AgentManager agentManager;
     private System.Random random;
 	private bool running = false;
@@ -30,45 +37,64 @@ public class Driving : MonoBehaviour
 	void Start()
     {
 		random = new System.Random();
-		agentManager = GetComponent<AgentManager>();
-		geneticAlgorithm = new GeneticAlgorithm<float>(agentManager.agents.Count, innerCount, random, GetRandomGene, FitnessFunction, mutationRate: mutationRate);
+		agentManager = new AgentManager(agentPrefab, transform.position, goal.transform.position);
+		geneticAlgorithm = new GeneticAlgorithm<AgentData>(agentManager.agents.Count, innerCount, random, GetRandomGene, FitnessFunction, mutationRate: mutationRate);
+		agentManager.UpdateAgentNetworks(geneticAlgorithm.Population);
 	}
 
 	void Update()
     {
+		Time.timeScale = timeScale;
 		UpdateAlgorithmText();
+		agentManager.CheckActiveAgents(running);
 
 		if (running)
 		{
 			elapsedTime += Time.deltaTime;
-			agentManager.CheckActiveAgents();
-			agentManager.UpdateAgentAttributes(geneticAlgorithm.Population);
-			geneticAlgorithm.NewGeneration();
-			bestFit = geneticAlgorithm.BestFitness;
+
+			if (agentManager.completedGen)
+			{
+				geneticAlgorithm.NewGeneration();
+				agentManager.UpdateAgentNetworks(geneticAlgorithm.Population);
+				bestFit = geneticAlgorithm.BestFitness;
+				agentManager.completedGen = false;
+				agentManager.ResetAgents();
+			}
 		}
 	}
 
-	private float GetRandomGene()
+    private AgentData GetRandomGene()
 	{
-		float next = (float)random.NextDouble();
+		AgentData agentData = new AgentData();
+	
+		agentData.agentWeights = new List<Matrix<float>>();
+		agentData.agentBiases = new List<float>();
 
-		float value = (innerScale + bestFit) / (float)innerCount;
-
-		return (next * value);
+		agentData.agentWeights.Add(Matrix<float>.Build.Dense(3, 3));
+		agentData.agentWeights.Add(Matrix<float>.Build.Dense(3, 3));
+		agentData.agentWeights.Add(Matrix<float>.Build.Dense(3, 3));
+	
+		for (int k = 0; k < agentData.agentWeights.Count; k++)
+		{
+			for (int j = 0; j < agentData.agentWeights[k].RowCount; j++)
+			{
+				for (int i = 0; i < agentData.agentWeights[k].ColumnCount; i++)
+				{
+					agentData.agentWeights[k][i, j] = Random.Range(-1.0f, 1.0f);
+				}
+			}
+		}
+	
+		agentData.agentBiases.Add(Random.Range(-1.0f, 1.0f));
+		agentData.agentBiases.Add(Random.Range(-1.0f, 1.0f));
+	
+		return agentData;
 	}
 
 	private float FitnessFunction(int index)
 	{
-		float score = 0.0f;
-
-		DNA<float> dna = geneticAlgorithm.Population[index];
-
-		for (int i = 0; i < dna.Genes.Length; i++)
-		{
-			score += dna.Genes[i] - agentManager.agents[index].GetComponent<Agent>().GetOverallFitness();
-		}
-
-		return score;
+		float fitness = agentManager.agents[index].GetComponent<Agent>().GetOverallFitness();
+		return fitness;
 	}
 
 	private void UpdateAlgorithmText()
@@ -82,7 +108,7 @@ public class Driving : MonoBehaviour
 
 			for(int i = 0; i < geneticAlgorithm.BestGenes.Length; i++)
             {
-				total += geneticAlgorithm.BestGenes[i];
+				//total += geneticAlgorithm.BestGenes[i].agentBiases[0];
             }
 
 			bestGenesText.text = "Best Genes: " + total.ToString();
@@ -102,23 +128,12 @@ public class Driving : MonoBehaviour
 
 		if(running)
         {
-			for (int i = 0; i < 32; i++)
-			{
-				agentManager.SpawnAgent(agentPrefab, transform.position);
-			}
-
-			foreach(GameObject agent in agentManager.agents)
-			{
-				agent.GetComponent<Agent>().SetupAttributes();
-				agent.GetComponent<Agent>().SetGoalPosition(goal.transform.position);
-			}
-
 			if (runButtonText)
 				runButtonText.text = "STOP";
         }
         else
 		{
-			agentManager.EraseAgents();
+			agentManager.ResetAgents();
 
 			if (runButtonText)
 				runButtonText.text = "RUN";

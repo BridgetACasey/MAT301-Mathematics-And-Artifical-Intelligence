@@ -5,15 +5,19 @@ using UnityEngine;
 public class Agent : MonoBehaviour
 {
     [SerializeField] private Vector3 startPosition;
+    [SerializeField] private Vector3 previousPosition;
     [SerializeField] private Vector3 startRotation;
 
     [SerializeField] private Vector3 goalPosition;
 
     [SerializeField] private float elapsedTime;
     [SerializeField] private float distanceToGoal;
+    [SerializeField] private float distanceFromStart;
+    [SerializeField] private float distanceTravelled;
     [SerializeField] private float overallFitness;
 
     [SerializeField] private float moveSpeed = 12.0f;
+    [SerializeField] private float turnScale = 0.05f;
 
     [Range(-1.0f, 1.0f)]
     [SerializeField] private float acceleration = 1.0f;
@@ -22,7 +26,8 @@ public class Agent : MonoBehaviour
 
     [SerializeField] private Vector3 input;
 
-    [SerializeField] private bool driving;
+    [SerializeField] private bool running = false;
+    [SerializeField] private bool driving = false;
 
     [SerializeField] private NeuralNetwork neuralNetwork;
 
@@ -30,13 +35,17 @@ public class Agent : MonoBehaviour
 
     void Update()
     {
-        if (elapsedTime > 25.0f)    //Cuts the agent off if they're taking too long or driving in circles
-            driving = false;
-
-        if (driving)
+        if (running)
         {
-            elapsedTime += Time.deltaTime;
-            Drive();
+            if (elapsedTime > 6.0f)    //Cuts the agent off if they're taking too long or driving in circles
+                StopDriving();
+
+            if (driving)
+            {
+                elapsedTime += Time.deltaTime;
+                CalculateOverallFitness();
+                Drive();
+            }
         }
     }
 
@@ -51,6 +60,7 @@ public class Agent : MonoBehaviour
     {
         driving = true;
         startPosition = transform.position;
+        previousPosition = startPosition;
         startRotation = transform.eulerAngles;
         neuralNetwork.SetupNeuralNetwork();
     }
@@ -59,16 +69,17 @@ public class Agent : MonoBehaviour
     {
         elapsedTime = 0.0f;
         distanceToGoal = 0.0f;
+        distanceFromStart = 0.0f;
+        distanceTravelled = 0.0f;
         transform.position = startPosition;
         transform.Rotate(startRotation);
         overallFitness = 0.0f;
         driving = true;
-        //Reset neural network?
     }
 
     private void CalculateOverallFitness()
     {
-        overallFitness = distanceToGoal + elapsedTime + ((distanceForward + distanceLeft + distanceRight) / 3.0f);
+        overallFitness = distanceFromStart - elapsedTime;
     }
 
     private void CalculateDirectionalDistance()
@@ -93,28 +104,38 @@ public class Agent : MonoBehaviour
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.tag == "Obstacle")
-        {
-            driving = false;
-            distanceToGoal = (goalPosition - transform.position).magnitude;
-            CalculateOverallFitness();
-            //Debug.Log("Elapsed Time: " + elapsedTime + " Distance to Goal: " + distanceToGoal);
-            //Debug.Log("Forward: " + distanceForward + " Left: " + distanceLeft + " Right: " + distanceRight);
-        }
+            StopDriving();
     }
 
     public void Drive()
     {
-        //transform.position += input * Time.deltaTime * acceleration;
-        //transform.eulerAngles += new Vector3(0.0f, 0.0f, 0.0f);
+        previousPosition = transform.position;
 
-        //input = Vector3.Lerp(Vector3.zero, new Vector3(0, 0, acceleration * 11.4f), 0.02f);
         input = Vector3.Lerp(Vector3.zero, new Vector3(0, 0, acceleration * moveSpeed), 0.02f);
         input = transform.TransformDirection(input);
         transform.position += input;
-        transform.eulerAngles += new Vector3(0, (turnRate * 90) * 0.05f, 0);
+
+        transform.eulerAngles += new Vector3(0, (turnRate * 90.0f) * turnScale, 0);
+
+        distanceTravelled += (previousPosition - transform.position).magnitude;
+        distanceFromStart = (startPosition - transform.position).magnitude;
+    }
+
+    public void StopDriving()
+    {
+        driving = false;
+        distanceTravelled += (previousPosition - transform.position).magnitude;
+        distanceFromStart = (startPosition - transform.position).magnitude;
+        distanceToGoal = (goalPosition - transform.position).magnitude;
+        CalculateOverallFitness();
+        //Debug.Log("Fitness: " + overallFitness);
+        //Debug.Log("Elapsed Time: " + elapsedTime + " Distance to Goal: " + distanceToGoal);
+        //Debug.Log("Forward: " + distanceForward + " Left: " + distanceLeft + " Right: " + distanceRight);
     }
 
     public void SetGoalPosition(Vector3 position) { goalPosition = position; }
+
+    public void SetRunning(bool run) { running = run; }
 
     public bool GetDriving() { return driving; }
 

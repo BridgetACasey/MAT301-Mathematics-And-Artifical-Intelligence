@@ -9,11 +9,10 @@ public class NeuralNetwork : MonoBehaviour
 {
     [SerializeField] private Matrix<float> inputLayer = Matrix<float>.Build.Dense(1, 3);
     [SerializeField] private Matrix<float> outputLayer = Matrix<float>.Build.Dense(1, 2);
-                     
     [SerializeField] private List<Matrix<float>> hiddenLayers = new List<Matrix<float>>();
-    [SerializeField] private List<Matrix<float>> weights = new List<Matrix<float>>();
-                     
-    [SerializeField] private List<float> biases = new List<float>();
+
+    [SerializeField] public List<Matrix<float>> weights = new List<Matrix<float>>();                     
+    [SerializeField] public List<float> biases = new List<float>();
 
     public (float, float) RunNeuralNetwork(float right, float forward, float left)
     {
@@ -44,9 +43,8 @@ public class NeuralNetwork : MonoBehaviour
         biases.Clear();
 
         hiddenLayers.Add(Matrix<float>.Build.Dense(1, 3));
-        
-        biases.Add(Random.Range(-1.0f, 1.0f));
-        biases.Add(Random.Range(-1.0f, 1.0f));
+
+        RandomiseBiases();
 
         weights.Add(Matrix<float>.Build.Dense(3, 3));
         weights.Add(Matrix<float>.Build.Dense(3, 3));
@@ -67,6 +65,12 @@ public class NeuralNetwork : MonoBehaviour
                 }
             }
         }
+    }
+
+    private void RandomiseBiases()
+    {
+        biases.Add(Random.Range(-1.0f, 1.0f));
+        biases.Add(Random.Range(-1.0f, 1.0f));
     }
 
     private float SigmoidFunction(float s) { return (1.0f / (1.0f + Mathf.Exp(-s))); }
