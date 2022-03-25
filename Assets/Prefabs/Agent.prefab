@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 6845550108974546739}
   - component: {fileID: 6845550108974546738}
   - component: {fileID: 7548564989316327625}
+  - component: {fileID: 3569389796312037246}
   m_Layer: 6
   m_Name: Agent
   m_TagString: Untagged
@@ -125,5 +126,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4dd0bcf087038ee4b92b66d2bf0b7377, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  startPosition: {x: 0, y: 0, z: 0}
+  startRotation: {x: 0, y: 0, z: 0}
+  goalPosition: {x: 0, y: 0, z: 0}
+  elapsedTime: 0
+  distanceToGoal: 0
+  overallFitness: 0
+  acceleration: 1
+  turnRate: 0
   moveSpeed: 8
   turnSpeed: 1
+  input: {x: 0, y: 0, z: 0}
+  driving: 0
+  neuralNetwork: {fileID: 3569389796312037246}
+--- !u!114 &3569389796312037246
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6845550108974546741}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4210cc324e7f90f449fff006661dd5f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

@@ -12,12 +12,15 @@ public class Driving : MonoBehaviour
 	[SerializeField] private Text genNumText;
 	[SerializeField] private Text bestGenesText;
 	[SerializeField] private Text bestFitnessText;
+	[SerializeField] private Text elapsedTimeText;
 
 	[SerializeField] private float mutationRate = 0.01f;
 	[SerializeField] private int innerCount = 40;
 	[SerializeField] private float innerScale = 400.0f;
 	[SerializeField] private float timeScale = 1.0f;
 	[SerializeField] private float bestFit = 0.0f;
+
+	[SerializeField] private float elapsedTime = 0.0f;
 
 	private GeneticAlgorithm<float> geneticAlgorithm;
     private AgentManager agentManager;
@@ -37,6 +40,7 @@ public class Driving : MonoBehaviour
 
 		if (running)
 		{
+			elapsedTime += Time.deltaTime;
 			agentManager.CheckActiveAgents();
 			agentManager.UpdateAgentAttributes(geneticAlgorithm.Population);
 			geneticAlgorithm.NewGeneration();
@@ -86,6 +90,9 @@ public class Driving : MonoBehaviour
 
 		if (bestFitnessText)
 			bestFitnessText.text = "Best Fitness: " + geneticAlgorithm.BestFitness.ToString();
+
+		if (elapsedTimeText)
+			elapsedTimeText.text = "Time (s): " + elapsedTime.ToString();
 	}
 
 	public void RunAlgorithm()

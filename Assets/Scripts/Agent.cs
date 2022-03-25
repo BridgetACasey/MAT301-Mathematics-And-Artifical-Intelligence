@@ -13,22 +13,26 @@ public class Agent : MonoBehaviour
     [SerializeField] private float distanceToGoal;
     [SerializeField] private float overallFitness;
 
+    [SerializeField] private float moveSpeed = 12.0f;
+
     [Range(-1.0f, 1.0f)]
     [SerializeField] private float acceleration = 1.0f;
     [Range(-1.0f, 1.0f)]
     [SerializeField] private float turnRate;
 
-    [SerializeField] private float moveSpeed = 8.0f;
-    [SerializeField] private float turnSpeed = 1.0f;
-
     [SerializeField] private Vector3 input;
 
-    [SerializeField] bool driving;
+    [SerializeField] private bool driving;
+
+    [SerializeField] private NeuralNetwork neuralNetwork;
 
     private float distanceLeft, distanceForward, distanceRight; //The distance in each direction to the nearest wall
 
     void Update()
     {
+        if (elapsedTime > 25.0f)    //Cuts the agent off if they're taking too long or driving in circles
+            driving = false;
+
         if (driving)
         {
             elapsedTime += Time.deltaTime;
@@ -39,6 +43,8 @@ public class Agent : MonoBehaviour
     private void FixedUpdate()
     {
         CalculateDirectionalDistance();
+
+        (acceleration, turnRate) = neuralNetwork.RunNeuralNetwork(distanceRight, distanceForward, distanceLeft);
     }
 
     public void SetupAttributes()
@@ -46,6 +52,7 @@ public class Agent : MonoBehaviour
         driving = true;
         startPosition = transform.position;
         startRotation = transform.eulerAngles;
+        neuralNetwork.SetupNeuralNetwork();
     }
 
     public void ResetAttributes()
@@ -56,6 +63,7 @@ public class Agent : MonoBehaviour
         transform.Rotate(startRotation);
         overallFitness = 0.0f;
         driving = true;
+        //Reset neural network?
     }
 
     private void CalculateOverallFitness()
@@ -89,17 +97,18 @@ public class Agent : MonoBehaviour
             driving = false;
             distanceToGoal = (goalPosition - transform.position).magnitude;
             CalculateOverallFitness();
-            Debug.Log("Elapsed Time: " + elapsedTime + " Distance to Goal: " + distanceToGoal);
-            Debug.Log("Forward: " + distanceForward + " Left: " + distanceLeft + " Right: " + distanceRight);
+            //Debug.Log("Elapsed Time: " + elapsedTime + " Distance to Goal: " + distanceToGoal);
+            //Debug.Log("Forward: " + distanceForward + " Left: " + distanceLeft + " Right: " + distanceRight);
         }
     }
 
     public void Drive()
     {
-        //transform.position += transform.forward * Time.deltaTime * moveSpeed;
+        //transform.position += input * Time.deltaTime * acceleration;
         //transform.eulerAngles += new Vector3(0.0f, 0.0f, 0.0f);
 
-        input = Vector3.Lerp(Vector3.zero, new Vector3(0, 0, acceleration * 11.4f), 0.02f);
+        //input = Vector3.Lerp(Vector3.zero, new Vector3(0, 0, acceleration * 11.4f), 0.02f);
+        input = Vector3.Lerp(Vector3.zero, new Vector3(0, 0, acceleration * moveSpeed), 0.02f);
         input = transform.TransformDirection(input);
         transform.position += input;
         transform.eulerAngles += new Vector3(0, (turnRate * 90) * 0.05f, 0);

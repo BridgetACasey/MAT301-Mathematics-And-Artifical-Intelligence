@@ -229,6 +229,7 @@ MonoBehaviour:
   innerCount: 40
   innerScale: 400
   timeScale: 1
+  bestFit: 0
 --- !u!4 &101331583
 Transform:
   m_ObjectHideFlags: 0
