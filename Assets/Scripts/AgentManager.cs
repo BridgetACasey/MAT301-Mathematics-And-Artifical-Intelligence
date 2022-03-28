@@ -5,13 +5,14 @@ public class AgentManager
 {
     public List<GameObject> agents;
     public bool completedGen = false;
-    [SerializeField] private int populationSize = 32;
+    public bool goalReached = false;
+    public float bestDistance = 0.0f;
 
-    public AgentManager(GameObject agentPrefab, Vector3 spawnPoint, Vector3 goalPosition)
+    public AgentManager(int population, GameObject agentPrefab, Vector3 spawnPoint, Vector3 goalPosition)
     {
         agents = new List<GameObject>();
 
-        for (int i = 0; i < populationSize; i++)
+        for (int i = 0; i < population; i++)
         {
             SpawnAgent(agentPrefab, spawnPoint);
         }
@@ -31,6 +32,9 @@ public class AgentManager
         {
             agent.GetComponent<Agent>().SetRunning(running);
 
+            if (agent.GetComponent<Agent>().GetReachedGoal())
+                goalReached = true;
+
             if (agent.GetComponent<Agent>().GetDriving())
                 agentsRemaining++;
         }
@@ -42,18 +46,15 @@ public class AgentManager
         }
     }
 
-    public void UpdateAgentNetworks(List<DNA<AgentData>> genes)
+    public void UpdateAgentNetworks(List<DNA> genes)
     {
         for (int i = 0; i < genes.Count; i++)
         {
-            DNA<AgentData> dna = genes[i];
+            DNA dna = genes[i];
             GameObject agent = agents[i];
 
-            for (int j = 0; j < dna.Genes.Length; j++)
-            {
-                agent.GetComponent<NeuralNetwork>().weights = dna.Genes[j].agentWeights;
-                agent.GetComponent<NeuralNetwork>().biases = dna.Genes[j].agentBiases;
-            }
+            agent.GetComponent<NeuralNetwork>().weights = dna.Genes[0].agentWeights;
+            agent.GetComponent<NeuralNetwork>().biases = dna.Genes[0].agentBiases;
         }
     }
 

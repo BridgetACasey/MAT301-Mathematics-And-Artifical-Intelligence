@@ -1,8 +1,8 @@
+using MathNet.Numerics.LinearAlgebra;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using MathNet.Numerics.LinearAlgebra;
 
 public struct AgentData
 {
@@ -17,19 +17,20 @@ public class Driving : MonoBehaviour
 
 	[SerializeField] private Text runButtonText;
 	[SerializeField] private Text genNumText;
-	[SerializeField] private Text bestGenesText;
+	[SerializeField] private Text fitnessSumText;
 	[SerializeField] private Text bestFitnessText;
+	[SerializeField] private Text bestDistanceText;
+	[SerializeField] private Text currentTimeText;
 	[SerializeField] private Text elapsedTimeText;
 
+	[SerializeField] private int populationSize = 32;
 	[SerializeField] private float mutationRate = 0.01f;
-	[SerializeField] private int innerCount = 1;
-	[SerializeField] private float innerScale = 400.0f;
+	[SerializeField] private int dnaLength = 4;
 	[SerializeField] private float timeScale = 1.0f;
-	[SerializeField] private float bestFit = 0.0f;
-
+	[SerializeField] private float currentTime = 0.0f;
 	[SerializeField] private float elapsedTime = 0.0f;
 
-	private GeneticAlgorithm<AgentData> geneticAlgorithm;
+	private GeneticAlgorithm geneticAlgorithm;
     private AgentManager agentManager;
     private System.Random random;
 	private bool running = false;
@@ -37,8 +38,8 @@ public class Driving : MonoBehaviour
 	void Start()
     {
 		random = new System.Random();
-		agentManager = new AgentManager(agentPrefab, transform.position, goal.transform.position);
-		geneticAlgorithm = new GeneticAlgorithm<AgentData>(agentManager.agents.Count, innerCount, random, GetRandomGene, FitnessFunction, mutationRate: mutationRate);
+		agentManager = new AgentManager(populationSize, agentPrefab, transform.position, goal.transform.position);
+		geneticAlgorithm = new GeneticAlgorithm(agentManager.agents.Count, dnaLength, random, GetRandomGene, FitnessFunction, mutationRate: mutationRate);
 		agentManager.UpdateAgentNetworks(geneticAlgorithm.Population);
 	}
 
@@ -46,34 +47,43 @@ public class Driving : MonoBehaviour
     {
 		Time.timeScale = timeScale;
 		UpdateAlgorithmText();
+		
 		agentManager.CheckActiveAgents(running);
+
+		if(agentManager.goalReached)
+        {
+			RunAlgorithm();
+			agentManager.ResetAgents();
+			agentManager.goalReached = false;
+        }
 
 		if (running)
 		{
 			elapsedTime += Time.deltaTime;
+			currentTime += Time.deltaTime;
 
 			if (agentManager.completedGen)
 			{
 				geneticAlgorithm.NewGeneration();
 				agentManager.UpdateAgentNetworks(geneticAlgorithm.Population);
-				bestFit = geneticAlgorithm.BestFitness;
 				agentManager.completedGen = false;
 				agentManager.ResetAgents();
+				currentTime = 0.0f;
 			}
 		}
 	}
 
-    private AgentData GetRandomGene()
+	private AgentData GetRandomGene()
 	{
 		AgentData agentData = new AgentData();
-	
+
 		agentData.agentWeights = new List<Matrix<float>>();
 		agentData.agentBiases = new List<float>();
 
 		agentData.agentWeights.Add(Matrix<float>.Build.Dense(3, 3));
 		agentData.agentWeights.Add(Matrix<float>.Build.Dense(3, 3));
 		agentData.agentWeights.Add(Matrix<float>.Build.Dense(3, 3));
-	
+
 		for (int k = 0; k < agentData.agentWeights.Count; k++)
 		{
 			for (int j = 0; j < agentData.agentWeights[k].RowCount; j++)
@@ -84,10 +94,10 @@ public class Driving : MonoBehaviour
 				}
 			}
 		}
-	
+
 		agentData.agentBiases.Add(Random.Range(-1.0f, 1.0f));
 		agentData.agentBiases.Add(Random.Range(-1.0f, 1.0f));
-	
+
 		return agentData;
 	}
 
@@ -102,23 +112,20 @@ public class Driving : MonoBehaviour
 		if (genNumText)
 			genNumText.text = "Total Gens: " + geneticAlgorithm.Generation.ToString();
 
-		if(bestGenesText)
-        {
-			float total = 0;
-
-			for(int i = 0; i < geneticAlgorithm.BestGenes.Length; i++)
-            {
-				//total += geneticAlgorithm.BestGenes[i].agentBiases[0];
-            }
-
-			bestGenesText.text = "Best Genes: " + total.ToString();
-        }
+		if(fitnessSumText)
+			fitnessSumText.text = "Fitness Sum: " + geneticAlgorithm.fitnessSum;
 
 		if (bestFitnessText)
 			bestFitnessText.text = "Best Fitness: " + geneticAlgorithm.BestFitness.ToString();
 
+		if (bestDistanceText)
+			bestDistanceText.text = "Best Distance: ";
+
+		if (currentTimeText)
+			currentTimeText.text = "Time (s): " + currentTime.ToString();
+
 		if (elapsedTimeText)
-			elapsedTimeText.text = "Time (s): " + elapsedTime.ToString();
+			elapsedTimeText.text = "Total Time (s): " + elapsedTime.ToString();
 	}
 
 	public void RunAlgorithm()
@@ -133,8 +140,6 @@ public class Driving : MonoBehaviour
         }
         else
 		{
-			agentManager.ResetAgents();
-
 			if (runButtonText)
 				runButtonText.text = "RUN";
 		}

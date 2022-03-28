@@ -1,29 +1,29 @@
-using System;
 using System.Collections.Generic;
+using System;
 
-public class GeneticAlgorithm<T>
+public class GeneticAlgorithm
 {
-	public List<DNA<T>> Population { get; private set; }
+	public List<DNA> Population { get; private set; }
 	public int Generation { get; private set; }
 	public float BestFitness { get; private set; }
-	public T[] BestGenes { get; private set; }
+	public AgentData[] BestGenes { get; private set; }
 
 	public float mutationRate;
 	private Random random;
-	private float fitnessSum;
+	public float fitnessSum { get; private set; }
 
-	public GeneticAlgorithm(int populationSize, int dnaSize, Random random, Func<T> getRandomGene, Func<int, float> fitnessFunction, float mutationRate = 0.01f)
+	public GeneticAlgorithm(int populationSize, int dnaSize, Random random, Func<AgentData> getRandomGene, Func<int, float> fitnessFunction, float mutationRate = 0.01f)
 	{
 		Generation = 1;
 		this.mutationRate = mutationRate;
-		Population = new List<DNA<T>>();
+		Population = new List<DNA>();
 		this.random = random;
 
-		BestGenes = new T[dnaSize];
+		BestGenes = new AgentData[dnaSize];
 
 		for (int i = 0; i < populationSize; i++)
 		{
-			Population.Add(new DNA<T>(dnaSize, random, getRandomGene, fitnessFunction, shouldInitGenes: true));
+			Population.Add(new DNA(dnaSize, random, getRandomGene, fitnessFunction, shouldInitGenes: true));
 		}
 	}
 
@@ -36,14 +36,16 @@ public class GeneticAlgorithm<T>
 
 		CalculateFitness();
 
-		List<DNA<T>> newPopulation = new List<DNA<T>>();
+		List<DNA> newPopulation = new List<DNA>();
+
+		//DNA parent1 = ChooseBestParent();
 
 		for (int i = 0; i < Population.Count; i++)
 		{
-			DNA<T> parent1 = ChooseParent();
-			DNA<T> parent2 = ChooseParent();
+			DNA parent1 = ChooseParent();
+			DNA parent2 = ChooseParent();
 
-			DNA<T> child = parent1.Crossover(parent2);
+			DNA child = parent1.Crossover(parent2);
 
 			child.Mutate(mutationRate);
 
@@ -59,7 +61,7 @@ public class GeneticAlgorithm<T>
 	{
 		fitnessSum = 0;
 
-		DNA<T> best = Population[0];
+		DNA best = Population[0];
 
 		for (int i = 0; i < Population.Count; i++)
 		{
@@ -75,7 +77,7 @@ public class GeneticAlgorithm<T>
 		best.Genes.CopyTo(BestGenes, 0);
 	}
 
-	private DNA<T> ChooseParent()
+	private DNA ChooseParent()
 	{
 		double randomNumber = random.NextDouble() * fitnessSum;
 
@@ -90,5 +92,24 @@ public class GeneticAlgorithm<T>
 		}
 
 		return Population[random.Next(0, Population.Count)];
+	}
+
+	private DNA ChooseBestParent()
+    {
+		fitnessSum = 0;
+
+		DNA best = Population[0];
+
+		for (int i = 0; i < Population.Count; i++)
+		{
+			fitnessSum += Population[i].CalculateFitness(i);
+
+			if (Population[i].Fitness > best.Fitness)
+			{
+				best = Population[i];
+			}
+		}
+
+		return best;
 	}
 }

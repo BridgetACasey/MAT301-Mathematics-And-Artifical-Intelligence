@@ -16,18 +16,19 @@ public class Agent : MonoBehaviour
     [SerializeField] private float distanceTravelled;
     [SerializeField] private float overallFitness;
 
-    [SerializeField] private float moveSpeed = 12.0f;
-    [SerializeField] private float turnScale = 0.05f;
+    [SerializeField] private float moveSpeed = 24.0f;
+    [SerializeField] private float turnScale = 6.0f;
 
     [Range(-1.0f, 1.0f)]
     [SerializeField] private float acceleration = 1.0f;
     [Range(-1.0f, 1.0f)]
-    [SerializeField] private float turnRate;
+    [SerializeField] private float steering;
 
     [SerializeField] private Vector3 input;
 
     [SerializeField] private bool running = false;
     [SerializeField] private bool driving = false;
+    [SerializeField] private bool reachedGoal = false;
 
     [SerializeField] private NeuralNetwork neuralNetwork;
 
@@ -37,7 +38,10 @@ public class Agent : MonoBehaviour
     {
         if (running)
         {
-            if (elapsedTime > 6.0f)    //Cuts the agent off if they're taking too long or driving in circles
+            if (reachedGoal || elapsedTime > 30.0f)    //Cuts the agent off if they're taking too long or have reached the goal
+                StopDriving();
+
+            if (distanceFromStart < 3.0f && elapsedTime > 6.0f)    //Cuts the agent off if they're just driving in circles
                 StopDriving();
 
             if (driving)
@@ -53,7 +57,7 @@ public class Agent : MonoBehaviour
     {
         CalculateDirectionalDistance();
 
-        (acceleration, turnRate) = neuralNetwork.RunNeuralNetwork(distanceRight, distanceForward, distanceLeft);
+        (acceleration, steering) = neuralNetwork.RunNeuralNetwork(distanceRight, distanceForward, distanceLeft);
     }
 
     public void SetupAttributes()
@@ -74,48 +78,54 @@ public class Agent : MonoBehaviour
         transform.position = startPosition;
         transform.Rotate(startRotation);
         overallFitness = 0.0f;
+        reachedGoal = false;
         driving = true;
     }
 
     private void CalculateOverallFitness()
     {
-        overallFitness = distanceFromStart - elapsedTime;
+        overallFitness = distanceFromStart + (distanceTravelled * 0.05f) - elapsedTime;
+        //overallFitness = distanceFromStart - elapsedTime;
     }
 
     private void CalculateDirectionalDistance()
     {
         Ray ray = new Ray(transform.position, transform.forward);
         RaycastHit hit;
+        float trackWidth = 12.0f;
 
         if (Physics.Raycast(ray, out hit))
-            distanceForward = hit.distance / 12.0f;
+            distanceForward = hit.distance / trackWidth;
 
         ray.direction = transform.forward + transform.right;
 
         if (Physics.Raycast(ray, out hit))
-            distanceRight = hit.distance / 12.0f;
+            distanceRight = hit.distance / trackWidth;
 
         ray.direction = transform.forward - transform.right;
 
         if (Physics.Raycast(ray, out hit))
-            distanceLeft = hit.distance / 12.0f;
+            distanceLeft = hit.distance / trackWidth;
     }
 
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.tag == "Obstacle")
             StopDriving();
+
+        if (collision.gameObject.tag == "Goal")
+            reachedGoal = true;
     }
 
     public void Drive()
     {
         previousPosition = transform.position;
 
-        input = Vector3.Lerp(Vector3.zero, new Vector3(0, 0, acceleration * moveSpeed), 0.02f);
+        input = Vector3.Lerp(Vector3.zero, new Vector3(0.0f, 0.0f, acceleration * moveSpeed), 0.95f);
         input = transform.TransformDirection(input);
-        transform.position += input;
+        transform.position += (input * Time.deltaTime);
 
-        transform.eulerAngles += new Vector3(0, (turnRate * 90.0f) * turnScale, 0);
+        transform.eulerAngles += (new Vector3(0.0f, (steering * 90.0f) * turnScale, 0.0f) * Time.deltaTime);
 
         distanceTravelled += (previousPosition - transform.position).magnitude;
         distanceFromStart = (startPosition - transform.position).magnitude;
@@ -128,9 +138,9 @@ public class Agent : MonoBehaviour
         distanceFromStart = (startPosition - transform.position).magnitude;
         distanceToGoal = (goalPosition - transform.position).magnitude;
         CalculateOverallFitness();
-        //Debug.Log("Fitness: " + overallFitness);
-        //Debug.Log("Elapsed Time: " + elapsedTime + " Distance to Goal: " + distanceToGoal);
-        //Debug.Log("Forward: " + distanceForward + " Left: " + distanceLeft + " Right: " + distanceRight);
+
+        if (reachedGoal)
+            overallFitness += 50.0f;
     }
 
     public void SetGoalPosition(Vector3 position) { goalPosition = position; }
@@ -139,5 +149,9 @@ public class Agent : MonoBehaviour
 
     public bool GetDriving() { return driving; }
 
+    public bool GetReachedGoal() { return reachedGoal; }
+
     public float GetOverallFitness() { return overallFitness; }
+
+    public float GetDistanceFromStart() { return distanceFromStart; }
 }

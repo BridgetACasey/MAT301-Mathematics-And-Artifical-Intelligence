@@ -127,17 +127,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   startPosition: {x: 0, y: 0, z: 0}
+  previousPosition: {x: 0, y: 0, z: 0}
   startRotation: {x: 0, y: 0, z: 0}
   goalPosition: {x: 0, y: 0, z: 0}
   elapsedTime: 0
   distanceToGoal: 0
+  distanceFromStart: 0
+  distanceTravelled: 0
   overallFitness: 0
+  moveSpeed: 24
+  turnScale: 6
   acceleration: 1
-  turnRate: 0
-  moveSpeed: 8
-  turnSpeed: 1
+  steering: 0
   input: {x: 0, y: 0, z: 0}
+  running: 0
   driving: 0
+  reachedGoal: 0
   neuralNetwork: {fileID: 3569389796312037246}
 --- !u!114 &3569389796312037246
 MonoBehaviour:
@@ -151,3 +156,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4210cc324e7f90f449fff006661dd5f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  biases: []
