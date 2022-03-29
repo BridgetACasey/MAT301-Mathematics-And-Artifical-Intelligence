@@ -8,7 +8,7 @@ public class AgentManager
     public bool goalReached = false;
     public float bestDistance = 0.0f;
 
-    public AgentManager(int population, GameObject agentPrefab, Vector3 spawnPoint, Vector3 goalPosition)
+    public AgentManager(int population, GameObject agentPrefab, Vector3 spawnPoint)
     {
         agents = new List<GameObject>();
 
@@ -20,7 +20,6 @@ public class AgentManager
         foreach (GameObject agent in agents)
         {
             agent.GetComponent<Agent>().SetupAttributes();
-            agent.GetComponent<Agent>().SetGoalPosition(goalPosition);
         }
     }
 

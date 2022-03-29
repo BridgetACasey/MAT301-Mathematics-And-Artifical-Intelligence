@@ -43,20 +43,7 @@ public class DNA
 		for (int i = 0; i < Genes.Length; i++)
 		{
 			//child.Genes[i] = random.NextDouble() < 0.5 ? Genes[i] : otherParent.Genes[i];
-			child.Genes[i] = random.NextDouble() < 0.8 ? Genes[i] : otherParent.Genes[i];
-
-			//child.Genes[i].agentWeights = new List<Matrix<float>>();
-			//child.Genes[i].agentBiases = new List<float>();
-			//
-			//for (int j = 0; j < 3; j++)
-			//{
-			//	child.Genes[i].agentWeights.Add((Genes[i].agentWeights[j] + otherParent.Genes[i].agentWeights[j]) / 2);
-			//}
-			//
-			//for(int k = 0; k < 2; k++)
-			//{
-			//	child.Genes[i].agentBiases.Add((Genes[i].agentBiases[k] + otherParent.Genes[i].agentBiases[k]) / 2);
-			//}
+			child.Genes[i] = random.NextDouble() < 0.75 ? Genes[i] : otherParent.Genes[i];
 		}
 		
 		return child;

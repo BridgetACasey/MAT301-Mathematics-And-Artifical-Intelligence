@@ -220,7 +220,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   agentPrefab: {fileID: 6845550108974546741, guid: 49f8927891e4c7e4491ea8ef3ed3eb97, type: 3}
-  goal: {fileID: 965404443}
   runButtonText: {fileID: 2028174960}
   genNumText: {fileID: 569842007}
   fitnessSumText: {fileID: 2007472533}
@@ -229,7 +228,7 @@ MonoBehaviour:
   currentTimeText: {fileID: 677083876}
   elapsedTimeText: {fileID: 331577846}
   populationSize: 32
-  mutationRate: 0.2
+  mutationRate: 0.15
   dnaLength: 1
   timeScale: 2.5
   currentTime: 0
@@ -242,7 +241,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 101331581}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: 20}
+  m_LocalPosition: {x: 0, y: 1, z: 17.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -2748,11 +2747,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
---- !u!1 &965404443 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3024819095223803773, guid: 4cf63d2d07b8cf8449a7d3b1d1b6c35d, type: 3}
-  m_PrefabInstance: {fileID: 325809334}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &988039079
 PrefabInstance:
   m_ObjectHideFlags: 0

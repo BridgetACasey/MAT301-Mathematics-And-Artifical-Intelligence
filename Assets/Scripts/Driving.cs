@@ -13,7 +13,6 @@ public struct AgentData
 public class Driving : MonoBehaviour
 {
     [SerializeField] private GameObject agentPrefab;
-	[SerializeField] private GameObject goal;
 
 	[SerializeField] private Text runButtonText;
 	[SerializeField] private Text genNumText;
@@ -38,7 +37,7 @@ public class Driving : MonoBehaviour
 	void Start()
     {
 		random = new System.Random();
-		agentManager = new AgentManager(populationSize, agentPrefab, transform.position, goal.transform.position);
+		agentManager = new AgentManager(populationSize, agentPrefab, transform.position);
 		geneticAlgorithm = new GeneticAlgorithm(agentManager.agents.Count, dnaLength, random, GetRandomGene, FitnessFunction, mutationRate: mutationRate);
 		agentManager.UpdateAgentNetworks(geneticAlgorithm.Population);
 	}
@@ -50,12 +49,12 @@ public class Driving : MonoBehaviour
 		
 		agentManager.CheckActiveAgents(running);
 
-		if(agentManager.goalReached)
-        {
-			RunAlgorithm();
-			agentManager.ResetAgents();
-			agentManager.goalReached = false;
-        }
+		//if(agentManager.goalReached)
+        //{
+		//	RunAlgorithm();
+		//	agentManager.ResetAgents();
+		//	agentManager.goalReached = false;
+        //}
 
 		if (running)
 		{
@@ -142,6 +141,8 @@ public class Driving : MonoBehaviour
 		{
 			if (runButtonText)
 				runButtonText.text = "RUN";
+
+			agentManager.ResetAgents();
 		}
     }
 }

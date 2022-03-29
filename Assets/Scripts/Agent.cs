@@ -8,10 +8,7 @@ public class Agent : MonoBehaviour
     [SerializeField] private Vector3 previousPosition;
     [SerializeField] private Vector3 startRotation;
 
-    [SerializeField] private Vector3 goalPosition;
-
     [SerializeField] private float elapsedTime;
-    [SerializeField] private float distanceToGoal;
     [SerializeField] private float distanceFromStart;
     [SerializeField] private float distanceTravelled;
     [SerializeField] private float overallFitness;
@@ -41,7 +38,7 @@ public class Agent : MonoBehaviour
             if (reachedGoal || elapsedTime > 30.0f)    //Cuts the agent off if they're taking too long or have reached the goal
                 StopDriving();
 
-            if (distanceFromStart < 3.0f && elapsedTime > 6.0f)    //Cuts the agent off if they're just driving in circles
+            if (distanceFromStart < 3.0f && elapsedTime > 8.0f)    //Cuts the agent off if they're just driving in circles
                 StopDriving();
 
             if (driving)
@@ -72,10 +69,10 @@ public class Agent : MonoBehaviour
     public void ResetAttributes()
     {
         elapsedTime = 0.0f;
-        distanceToGoal = 0.0f;
         distanceFromStart = 0.0f;
         distanceTravelled = 0.0f;
         transform.position = startPosition;
+        previousPosition = startPosition;
         transform.Rotate(startRotation);
         overallFitness = 0.0f;
         reachedGoal = false;
@@ -98,11 +95,13 @@ public class Agent : MonoBehaviour
             distanceForward = hit.distance / trackWidth;
 
         ray.direction = transform.forward + transform.right;
+        //ray.direction = transform.right;
 
         if (Physics.Raycast(ray, out hit))
             distanceRight = hit.distance / trackWidth;
 
         ray.direction = transform.forward - transform.right;
+        //ray.direction = -transform.right;
 
         if (Physics.Raycast(ray, out hit))
             distanceLeft = hit.distance / trackWidth;
@@ -136,14 +135,11 @@ public class Agent : MonoBehaviour
         driving = false;
         distanceTravelled += (previousPosition - transform.position).magnitude;
         distanceFromStart = (startPosition - transform.position).magnitude;
-        distanceToGoal = (goalPosition - transform.position).magnitude;
         CalculateOverallFitness();
 
         if (reachedGoal)
             overallFitness += 50.0f;
     }
-
-    public void SetGoalPosition(Vector3 position) { goalPosition = position; }
 
     public void SetRunning(bool run) { running = run; }
 
