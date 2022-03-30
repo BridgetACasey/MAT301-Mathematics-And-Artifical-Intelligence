@@ -26,6 +26,7 @@ public class AgentManager
         }
     }
 
+    //Assesses the active agents and updates relevant data about the current generation
     public void CheckActiveAgents(bool running)
     {
         agentsCrashed = 0;
@@ -76,6 +77,7 @@ public class AgentManager
             DNA dna = genes[i];
             GameObject agent = agents[i];
 
+            //Only using one set of genes per agent network, hence hard-coding the first element
             agent.GetComponent<NeuralNetwork>().weights = dna.Genes[0].agentWeights;
             agent.GetComponent<NeuralNetwork>().biases = dna.Genes[0].agentBiases;
         }

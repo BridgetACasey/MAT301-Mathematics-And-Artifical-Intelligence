@@ -42,6 +42,7 @@ public class GeneticAlgorithm
 
 		List<DNA> newPopulation = new List<DNA>();
 
+		//Ensures next generation is always partly inheriting from the best results of the previous generation
 		DNA parent1 = ChooseBestParent();
 
 		for (int i = 0; i < Population.Count; i++)
@@ -81,7 +82,7 @@ public class GeneticAlgorithm
 		best.Genes.CopyTo(BestGenes, 0);
 	}
 
-	private void CalculateBestPerformers()
+	private void CalculateBestPerformers()	//Reorders the current population by highest fitness score
     {
 		Population.CopyTo(bestPerformers, 0);
 
@@ -108,12 +109,14 @@ public class GeneticAlgorithm
 		return Population[random.Next(0, Population.Count)];
 	}
 
+	//Chooses a parent from the best performers of the previous generation
 	private DNA ChooseBestParent()
     {
 		DNA best = bestPerformers[0];
 
 		double randomNumber = random.NextDouble();
 
+		//Will return the parent with the highest fitness score 70% of the time, otherwise will choose one of the other top 3
 		if (randomNumber > 0.2 && randomNumber < 0.3)
 			best = bestPerformers[1];
 		else if (randomNumber > 0.1 && randomNumber < 0.2)

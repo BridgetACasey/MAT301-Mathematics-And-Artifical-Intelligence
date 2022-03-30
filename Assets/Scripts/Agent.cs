@@ -21,6 +21,7 @@ public class Agent : MonoBehaviour
     [SerializeField] private float distanceTravelled;
     [SerializeField] private float overallFitness;
 
+    //Multipliers to scale the intensity of the agent's speed and rotation
     [SerializeField] private float moveSpeed = 24.0f;
     [SerializeField] private float turnScale = 6.0f;
 
@@ -96,10 +97,11 @@ public class Agent : MonoBehaviour
 
     private void CalculateOverallFitness()
     {
+        //Scaling the distance travelled by some weight, as distance from start is more important and there is a chance the agent may have driven in circles
         overallFitness = distanceFromStart + (distanceTravelled * 0.05f) - elapsedTime;
-        //overallFitness = distanceFromStart - elapsedTime;
     }
 
+    //Determines the distances to the nearest obstacles in front of the agent in three directions
     private void CalculateDirectionalDistance()
     {
         Ray ray = new Ray(transform.position, transform.forward);
@@ -107,8 +109,9 @@ public class Agent : MonoBehaviour
         float trackWidth = 12.0f;
 
         if (Physics.Raycast(ray, out hit))
-            distanceForward = hit.distance / trackWidth;
+            distanceForward = hit.distance / trackWidth;    //Dividing by the approx. width of the racetrack to scale the result, as it's likely too large by default
 
+        //Taking the diagonal left and right instead of the direct left and right, as the agent is always moving forward
         ray.direction = transform.forward + transform.right;
         //ray.direction = transform.right;
 
@@ -141,6 +144,7 @@ public class Agent : MonoBehaviour
     {
         previousPosition = transform.position;
 
+        //Interpolating to get the new forward direction of the agent relative to their acceleration
         input = Vector3.Lerp(Vector3.zero, new Vector3(0.0f, 0.0f, acceleration * moveSpeed), 0.95f);
         input = transform.TransformDirection(input);
         transform.position += (input * Time.deltaTime);
@@ -158,7 +162,7 @@ public class Agent : MonoBehaviour
         distanceFromStart = (startPosition - transform.position).magnitude;
         CalculateOverallFitness();
 
-        if (reachedGoal)
+        if (reachedGoal)    //If the agent has managed to complete the track, ensure their fitness score is significantly higher
             overallFitness += 50.0f;
     }
 

@@ -40,6 +40,7 @@ public class DNA
 
 		for (int i = 0; i < Genes.Length; i++)
 		{
+			//Crossover will slightly favour the current set of genes, assuming it is the best from the previous generation
 			child.Genes[i] = random.NextDouble() < 0.67 ? Genes[i] : otherParent.Genes[i];
 			//child.Genes[i].agentWeights = random.NextDouble() < 0.67 ? Genes[i].agentWeights : otherParent.Genes[i].agentWeights;
 			//child.Genes[i].agentBiases = random.NextDouble() < 0.67 ? Genes[i].agentBiases : otherParent.Genes[i].agentBiases;

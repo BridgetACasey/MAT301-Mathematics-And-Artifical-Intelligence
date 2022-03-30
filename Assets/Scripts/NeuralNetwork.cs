@@ -20,23 +20,27 @@ public class NeuralNetwork : MonoBehaviour
         inputLayer[0, 1] = forward;
         inputLayer[0, 2] = left;
 
+        //Using PointwiseTanh to get the hyperbolic tangent of each distance
         inputLayer = inputLayer.PointwiseTanh();
 
         hiddenLayers[0] = ((inputLayer * weights[0]) + biases[0]).PointwiseTanh();
 
-        for (int i = 1; i < hiddenLayers.Count; i++)
+        for (int i = 1; i < hiddenLayers.Count; i++)    //If using more than 1 hidden layer, apply the corresponding weights and biases
         {
             hiddenLayers[i] = ((hiddenLayers[i - 1] * weights[i]) + biases[i]).PointwiseTanh();
         }
 
         outputLayer = ((hiddenLayers[hiddenLayers.Count - 1] * weights[weights.Count - 1]) + biases[biases.Count - 1]).PointwiseTanh();
 
+        //Using the sigmoid function to get a normalised result for acceleration, as it should never be greater than 1.0
+        //Applying the tangent function again to get the true steering value, which should always be between -1.0 and 1.0
         return (SigmoidFunction(outputLayer[0, 0]), (float)Math.Tanh(outputLayer[0, 1]));
     }
 
     public void SetupNeuralNetwork()
     {
         ResetNeuralNetwork();
+        //Initialising weights and biases to be random at launch
         RandomiseBiases();
         RandomiseWeights();
     }

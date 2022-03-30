@@ -28,6 +28,7 @@ public class CSVWriter : MonoBehaviour
         filePath = Application.dataPath + "/" + fileName;
     }
 
+    //Prints every generation's stored data to a new .csv file
     public void WriteAgentDataToCSV()
     {
         TextWriter writer = new StreamWriter(filePath, false);

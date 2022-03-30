@@ -9,6 +9,7 @@ public struct AgentData
 	public List<float> agentBiases;
 }
 
+//The runnable script for the entire program
 public class Driving : MonoBehaviour
 {
     [SerializeField] private GameObject agentPrefab;
