@@ -29,6 +29,8 @@ public class AgentManager
     //Assesses the active agents and updates relevant data about the current generation
     public void CheckActiveAgents(bool running)
     {
+        bool goal = false;  //Using a second variable to ensure loop finishes before checking if the program should stop
+
         agentsCrashed = 0;
         agentsTimedOut = 0;
         agentsCompleted = 0;
@@ -40,9 +42,6 @@ public class AgentManager
             Agent currentAgent = agent.GetComponent<Agent>();
 
             currentAgent.SetRunning(running);
-
-            if (currentAgent.GetReachedGoal())
-                goalReached = true;
 
             if (currentAgent.GetDriving())
                 agentsRemaining++;
@@ -61,12 +60,18 @@ public class AgentManager
                 default:
                     break;
             }
+
+            if (currentAgent.GetReachedGoal())
+                goal = true;
         }
 
         if (running)
         {
             if (agentsRemaining == 0)
                 completedGen = true;
+
+            if (goal)
+                goalReached = true;
         }
     }
 

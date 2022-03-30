@@ -50,12 +50,6 @@ public class Driving : MonoBehaviour
 		
 		agentManager.CheckActiveAgents(running);
 
-		if(agentManager.GetGoalReached())
-        {
-			RunAlgorithm();
-			agentManager.SetGoalReached(false);
-        }
-
 		if (running)
 		{
 			elapsedTime += Time.deltaTime;
@@ -70,6 +64,12 @@ public class Driving : MonoBehaviour
 				agentManager.ResetAgents();
 				currentTime = 0.0f;
 			}
+		}
+
+		if (agentManager.GetGoalReached())
+		{
+			RunAlgorithm();
+			agentManager.SetGoalReached(false);
 		}
 	}
 
