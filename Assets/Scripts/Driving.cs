@@ -50,6 +50,11 @@ public class Driving : MonoBehaviour
 		
 		agentManager.CheckActiveAgents(running);
 
+		if(Input.GetKeyDown(KeyCode.Escape))
+        {
+			Application.Quit();
+        }
+
 		if (running)
 		{
 			elapsedTime += Time.deltaTime;

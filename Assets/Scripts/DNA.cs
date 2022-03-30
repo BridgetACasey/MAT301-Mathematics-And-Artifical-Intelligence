@@ -38,12 +38,19 @@ public class DNA
 	{
 		DNA child = new DNA(Genes.Length, random, getRandomGene, fitnessFunction, shouldInitGenes: false);
 
+		//Crossover will slightly favour the current set of genes, assuming it is the best from the previous generation
 		for (int i = 0; i < Genes.Length; i++)
 		{
-			//Crossover will slightly favour the current set of genes, assuming it is the best from the previous generation
-			child.Genes[i] = random.NextDouble() < 0.67 ? Genes[i] : otherParent.Genes[i];
-			//child.Genes[i].agentWeights = random.NextDouble() < 0.67 ? Genes[i].agentWeights : otherParent.Genes[i].agentWeights;
-			//child.Genes[i].agentBiases = random.NextDouble() < 0.67 ? Genes[i].agentBiases : otherParent.Genes[i].agentBiases;
+			//Will choose between whole sets of genes 80% of the time, otherwise will mix and match the weights and biases between parents
+			if (random.NextDouble() < 0.8)
+			{
+				child.Genes[i] = random.NextDouble() < 0.67 ? Genes[i] : otherParent.Genes[i];
+			}
+			else
+			{
+				child.Genes[i].agentWeights = random.NextDouble() < 0.67 ? Genes[i].agentWeights : otherParent.Genes[i].agentWeights;
+				child.Genes[i].agentBiases = random.NextDouble() < 0.67 ? Genes[i].agentBiases : otherParent.Genes[i].agentBiases;
+			}
 		}
 		
 		return child;
