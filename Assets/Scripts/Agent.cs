@@ -1,9 +1,17 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+
+public enum AgentStatus
+{
+    NONE = 0,
+    CRASHED,
+    TIMEDOUT,
+    COMPLETED
+}
 
 public class Agent : MonoBehaviour
 {
+    [SerializeField] private AgentStatus agentStatus;
+    
     [SerializeField] private Vector3 startPosition;
     [SerializeField] private Vector3 previousPosition;
     [SerializeField] private Vector3 startRotation;
@@ -19,7 +27,7 @@ public class Agent : MonoBehaviour
     [Range(-1.0f, 1.0f)]
     [SerializeField] private float acceleration = 1.0f;
     [Range(-1.0f, 1.0f)]
-    [SerializeField] private float steering;
+    [SerializeField] private float steering = 0.0f;
 
     [SerializeField] private Vector3 input;
 
@@ -35,11 +43,11 @@ public class Agent : MonoBehaviour
     {
         if (running)
         {
-            if (reachedGoal || elapsedTime > 30.0f)    //Cuts the agent off if they're taking too long or have reached the goal
+            if (elapsedTime > 30.0f || (distanceFromStart < 3.0f && elapsedTime > 8.0f))    //Cuts the agent off if they're taking too long or just driving in circles
+            {
+                agentStatus = AgentStatus.TIMEDOUT;
                 StopDriving();
-
-            if (distanceFromStart < 3.0f && elapsedTime > 8.0f)    //Cuts the agent off if they're just driving in circles
-                StopDriving();
+            }
 
             if (driving)
             {
@@ -68,12 +76,19 @@ public class Agent : MonoBehaviour
 
     public void ResetAttributes()
     {
+        agentStatus = AgentStatus.NONE;
         elapsedTime = 0.0f;
+        acceleration = 1.0f;
+        steering = 0.0f;
+        input = new Vector3(0.0f, 0.0f, 0.0f);
+        distanceLeft = 0.0f;
+        distanceForward = 0.0f;
+        distanceRight = 0.0f;
         distanceFromStart = 0.0f;
         distanceTravelled = 0.0f;
         transform.position = startPosition;
         previousPosition = startPosition;
-        transform.Rotate(startRotation);
+        transform.eulerAngles = startRotation;
         overallFitness = 0.0f;
         reachedGoal = false;
         driving = true;
@@ -110,10 +125,16 @@ public class Agent : MonoBehaviour
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.tag == "Obstacle")
+        {
+            agentStatus = AgentStatus.CRASHED;
             StopDriving();
-
-        if (collision.gameObject.tag == "Goal")
+        }
+        else if (collision.gameObject.tag == "Goal")
+        {
+            agentStatus = AgentStatus.COMPLETED;
             reachedGoal = true;
+            StopDriving();
+        }
     }
 
     public void Drive()
@@ -141,6 +162,10 @@ public class Agent : MonoBehaviour
             overallFitness += 50.0f;
     }
 
+    public void SetStatus(AgentStatus status) { agentStatus = status; }
+
+    public AgentStatus GetStatus() { return agentStatus; }
+
     public void SetRunning(bool run) { running = run; }
 
     public bool GetDriving() { return driving; }
@@ -149,5 +174,9 @@ public class Agent : MonoBehaviour
 
     public float GetOverallFitness() { return overallFitness; }
 
+    public float GetElapsedTime() { return elapsedTime; }
+
     public float GetDistanceFromStart() { return distanceFromStart; }
+
+    public float GetDistanceTravelled() { return distanceTravelled; }
 }

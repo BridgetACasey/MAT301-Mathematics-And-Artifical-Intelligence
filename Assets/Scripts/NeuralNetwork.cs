@@ -36,6 +36,13 @@ public class NeuralNetwork : MonoBehaviour
 
     public void SetupNeuralNetwork()
     {
+        ResetNeuralNetwork();
+        RandomiseBiases();
+        RandomiseWeights();
+    }
+
+    public void ResetNeuralNetwork()
+    {
         inputLayer.Clear();
         outputLayer.Clear();
         hiddenLayers.Clear();
@@ -44,13 +51,9 @@ public class NeuralNetwork : MonoBehaviour
 
         hiddenLayers.Add(Matrix<float>.Build.Dense(1, 3));
 
-        RandomiseBiases();
-
         weights.Add(Matrix<float>.Build.Dense(3, 3));
         weights.Add(Matrix<float>.Build.Dense(3, 3));
         weights.Add(Matrix<float>.Build.Dense(3, 3));
-
-        RandomiseWeights();
     }
 
     private void RandomiseWeights()

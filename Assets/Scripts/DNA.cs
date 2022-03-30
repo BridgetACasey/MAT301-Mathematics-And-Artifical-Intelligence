@@ -1,6 +1,4 @@
-using MathNet.Numerics.LinearAlgebra;
 using System;
-using System.Collections.Generic;
 
 public class DNA
 {
@@ -42,8 +40,9 @@ public class DNA
 
 		for (int i = 0; i < Genes.Length; i++)
 		{
-			//child.Genes[i] = random.NextDouble() < 0.5 ? Genes[i] : otherParent.Genes[i];
-			child.Genes[i] = random.NextDouble() < 0.75 ? Genes[i] : otherParent.Genes[i];
+			child.Genes[i] = random.NextDouble() < 0.67 ? Genes[i] : otherParent.Genes[i];
+			//child.Genes[i].agentWeights = random.NextDouble() < 0.67 ? Genes[i].agentWeights : otherParent.Genes[i].agentWeights;
+			//child.Genes[i].agentBiases = random.NextDouble() < 0.67 ? Genes[i].agentBiases : otherParent.Genes[i].agentBiases;
 		}
 		
 		return child;

@@ -4,9 +4,12 @@ using UnityEngine;
 public class AgentManager
 {
     public List<GameObject> agents;
-    public bool completedGen = false;
-    public bool goalReached = false;
-    public float bestDistance = 0.0f;
+
+    private bool completedGen = false;
+    private bool goalReached = false;
+    private int agentsCrashed = 0;
+    private int agentsTimedOut = 0;
+    private int agentsCompleted = 0;
 
     public AgentManager(int population, GameObject agentPrefab, Vector3 spawnPoint)
     {
@@ -25,17 +28,38 @@ public class AgentManager
 
     public void CheckActiveAgents(bool running)
     {
+        agentsCrashed = 0;
+        agentsTimedOut = 0;
+        agentsCompleted = 0;
+
         int agentsRemaining = 0;
 
         foreach (GameObject agent in agents)
         {
-            agent.GetComponent<Agent>().SetRunning(running);
+            Agent currentAgent = agent.GetComponent<Agent>();
 
-            if (agent.GetComponent<Agent>().GetReachedGoal())
+            currentAgent.SetRunning(running);
+
+            if (currentAgent.GetReachedGoal())
                 goalReached = true;
 
-            if (agent.GetComponent<Agent>().GetDriving())
+            if (currentAgent.GetDriving())
                 agentsRemaining++;
+
+            switch(currentAgent.GetStatus())
+            {
+                case AgentStatus.CRASHED:
+                    agentsCrashed++;
+                    break;
+                case AgentStatus.TIMEDOUT:
+                    agentsTimedOut++;
+                    break;
+                case AgentStatus.COMPLETED:
+                    agentsCompleted++;
+                    break;
+                default:
+                    break;
+            }
         }
 
         if (running)
@@ -69,4 +93,18 @@ public class AgentManager
             agent.GetComponent<Agent>().ResetAttributes();
         }
     }
+
+    public void SetCompletedGen(bool gen) { completedGen = gen; }
+
+    public bool GetCompletedGen() { return completedGen; }
+
+    public void SetGoalReached(bool goal) { goalReached = goal; }
+
+    public bool GetGoalReached() { return goalReached; }
+
+    public int GetAgentsCrashed() { return agentsCrashed; }
+
+    public int GetAgentsTimedOut() { return agentsTimedOut; }
+
+    public int GetAgentsCompleted() { return agentsCompleted; }
 }
