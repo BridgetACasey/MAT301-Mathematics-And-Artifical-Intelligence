@@ -1,4 +1,6 @@
+using MathNet.Numerics.LinearAlgebra;
 using System;
+using System.Collections.Generic;
 
 public class DNA
 {
@@ -41,15 +43,22 @@ public class DNA
 		//Crossover will slightly favour the current set of genes, assuming it is the best from the previous generation
 		for (int i = 0; i < Genes.Length; i++)
 		{
-			//Will choose between whole sets of genes 80% of the time, otherwise will mix and match the weights and biases between parents
+			//Will mix and match the weights and biases between parents 80% of the time, otherwise will choose between whole sets of genes
+			child.Genes[i].agentWeights = new List<Matrix<float>>();
+			child.Genes[i].agentBiases = new List<float>();
+
 			if (random.NextDouble() < 0.8)
 			{
-				child.Genes[i] = random.NextDouble() < 0.67 ? Genes[i] : otherParent.Genes[i];
+				child.Genes[i].agentWeights.Add(random.NextDouble() < 0.67 ? Genes[i].agentWeights[0] : otherParent.Genes[i].agentWeights[0]);
+				child.Genes[i].agentWeights.Add(random.NextDouble() < 0.67 ? Genes[i].agentWeights[1] : otherParent.Genes[i].agentWeights[1]);
+				child.Genes[i].agentWeights.Add(random.NextDouble() < 0.67 ? Genes[i].agentWeights[2] : otherParent.Genes[i].agentWeights[2]);
+
+				child.Genes[i].agentBiases.Add(random.NextDouble() < 0.67 ? Genes[i].agentBiases[0] : otherParent.Genes[i].agentBiases[0]);
+				child.Genes[i].agentBiases.Add(random.NextDouble() < 0.67 ? Genes[i].agentBiases[1] : otherParent.Genes[i].agentBiases[1]);
 			}
 			else
 			{
-				child.Genes[i].agentWeights = random.NextDouble() < 0.67 ? Genes[i].agentWeights : otherParent.Genes[i].agentWeights;
-				child.Genes[i].agentBiases = random.NextDouble() < 0.67 ? Genes[i].agentBiases : otherParent.Genes[i].agentBiases;
+				child.Genes[i] = random.NextDouble() < 0.67 ? Genes[i] : otherParent.Genes[i];
 			}
 		}
 		

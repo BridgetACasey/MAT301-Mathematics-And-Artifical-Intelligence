@@ -15,6 +15,7 @@ public class Driving : MonoBehaviour
     [SerializeField] private GameObject agentPrefab;
 
 	[SerializeField] private Text runButtonText;
+	[SerializeField] private Text timeScaleText;
 	[SerializeField] private Text genNumText;
 	[SerializeField] private Text fitnessSumText;
 	[SerializeField] private Text bestFitnessText;
@@ -105,6 +106,7 @@ public class Driving : MonoBehaviour
 		csvWriter.testLogs.Add(testData);
 	}
 
+	//Creating a totally new set of weights and biases for an agent network
 	private AgentData GetRandomGene()
 	{
 		AgentData agentData = new AgentData();
@@ -141,20 +143,23 @@ public class Driving : MonoBehaviour
 
 	private void UpdateAlgorithmText()
     {
+		if (timeScaleText)
+			timeScaleText.text = "T. Scale: " + RoundToFigures(timeScale, 2).ToString();
+
 		if (genNumText)
 			genNumText.text = "Current Gen: " + geneticAlgorithm.Generation.ToString();
 
 		if(fitnessSumText)
-			fitnessSumText.text = "Fitness Sum: " + geneticAlgorithm.fitnessSum;
+			fitnessSumText.text = "Fitness Sum: " + RoundToFigures(geneticAlgorithm.fitnessSum, 3).ToString();
 
 		if (bestFitnessText)
-			bestFitnessText.text = "Best Fitness: " + geneticAlgorithm.BestFitness.ToString();
+			bestFitnessText.text = "Best Fitness: " + RoundToFigures(geneticAlgorithm.BestFitness, 3).ToString();
 
 		if (currentTimeText)
-			currentTimeText.text = "Gen Time (s): " + currentTime.ToString();
+			currentTimeText.text = "Gen Time (s): " + RoundToFigures(currentTime, 5).ToString();
 
 		if (elapsedTimeText)
-			elapsedTimeText.text = "Total Time (s): " + elapsedTime.ToString();
+			elapsedTimeText.text = "Total Time (s): " + RoundToFigures(elapsedTime, 5).ToString();
 	}
 
 	public void RunAlgorithm()
@@ -176,4 +181,15 @@ public class Driving : MonoBehaviour
 			agentManager.ResetAgents();
 		}
     }
+
+	public void IncreaseTimescale() { timeScale += 0.15f; }
+
+	public void DecreaseTimescale() { timeScale -= 0.15f; }
+
+	//Helper function for rounding decimals in the UI
+	public float RoundToFigures(float value, int digits)
+	{
+		float multiplier = Mathf.Pow(10.0f, (float)digits);
+		return (Mathf.Round(value * multiplier) / multiplier);
+	}
 }
